@@ -2701,6 +2701,7 @@ end
 if config['disable_turbolinks']
   prefs[:disable_turbolinks] = true
 end
+
 if prefs[:disable_turbolinks]
   say_wizard "recipe removing support for Rails Turbolinks"
   stage_two do
@@ -2715,6 +2716,15 @@ if prefs[:disable_turbolinks]
       when 'slim'
         gsub_file 'app/views/layouts/application.html.slim', /, 'data-turbolinks-track' => true/, ''
     end
+  end
+else
+  say_wizard "adding support for Rails Turbolinks"
+  add_gem 'nprogress-rails'
+  inject_into_file 'app/assets/javascripts/application.js', "//= require nprogress\n//= require nprogress-turbolinks\n", after: "require turbolinks\n"
+  inject_into_file 'app/assets/stylesheets/application.css', " *= require nprogress\n", after: "*= require_self\n"
+
+  if prefs[:frontend] == "bootstrap3" || prefs[:frontend] == "bootstrap2"
+    inject_into_file 'app/assets/stylesheets/application.css', " *= require nprogress-bootstrap\n", after: "*= require nprogress\n"
   end
 end
 
